@@ -2,7 +2,11 @@
 MotifMol3D is a predictive tool for molecular metabolic pathway categories that integrates motif information, graph neural networks, and 3D data to extract local features from small-sample molecules. 
 
 ## Requirements
-    Pytorch1.9
+    python 3.7
+    torch 0.9.1
+    hyperopt 0.2.7
+    rdkit
+    
 
 ## Model usage
 ### Training data
