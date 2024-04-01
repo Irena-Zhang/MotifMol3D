@@ -16,7 +16,6 @@ MotifMol3D is a predictive tool for molecular metabolic pathway categories that 
  
 ### Code manual
  * data.py: import and process the data <br/>
- * model.py: define MotifMol3D models <br/>
  * gasa_utils_aro.py: converts SMILES into graph with features <br/>
  * hyper.py: code for hyper-parameters optimization <br/>
  * gasa.json: best combination of hyper-parameters for MotifMol3D <br/>
