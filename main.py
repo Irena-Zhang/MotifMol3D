@@ -9,8 +9,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, roc_curve, auc, accuracy_score, recall_score, precision_score,f1_score,hamming_loss,label_ranking_loss
 import pandas as pd
 from model.gasa_utils_aro import generate_graph
-# from model.model import gasa_classifier, AtomEmbedding
-from model.aro_model  import gasa_classifier
+from model.aro_model_metric  import gasa_classifier
 from model.data import pred_data,predict_data, mkdir_p, init_trial_path, get_configure, predict_collate,shuffle_dataset,split_dataset
 from model.hyper import init_hyper_space, EarlyStopping
 from hyperopt import fmin, tpe
@@ -33,7 +32,6 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 def Coverage(label, output):
     label = label.to('cpu').data.numpy()
-    
     output = output.to('cpu').data.numpy()
     # print(label)
     D = len(label[0])
@@ -113,7 +111,6 @@ def run_train_epoch(args, model, train_loader, device, embed_model, embed_bond):
     # optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     optimizer = torch.optim.Adam(pack_model.parameters(), lr=0.0005)
     loss_total = 0
-    # print(pack_model)
     for iter, (smiles, bg, label, motif_vocab, maccs, feature_3d) in enumerate(train_loader):
         bg = generate_graph(smiles, embed_model, embed_bond, device)
         bg = dgl.batch(bg)
@@ -131,43 +128,6 @@ def run_train_epoch(args, model, train_loader, device, embed_model, embed_bond):
 
     return loss_total, loss
 
-
-def Find_Optimal_Cutoff(TPR, FPR, threshold): 
-    '''
-    Compute Youden index, find the optimal threshold
-    Parameters
-    TPR: True Positive Rate
-    FPR: False Positive Rate
-    threshold: 
-    return
-    optimal_threshold: optimal_threshold
-    point: optimum coordinates
-    '''
-    y = TPR - FPR
-    an = np.argwhere(y == np.amax(y))
-    Youden_index = an.flatten().tolist()
-    optimal_threshold = threshold[Youden_index]
-    point = [FPR[Youden_index], TPR[Youden_index]]
-    return optimal_threshold, point
-
-
-def statistic(y_true, y_pred):
-    '''
-    compute statistic results
-    Parameters
-    y_true: true label of the given molecules
-    y_pred: predicted label 
-    return
-    tp: True Positive
-    fn: False Negative
-    fp: False Positive
-    tn: True Negative
-    '''
-    c_mat = confusion_matrix(y_true, y_pred, labels=[0, 1])
-    tp, fn, fp, tn = list(c_mat.flatten())
-    return tp, fn, fp, tn
-
-
 def load_model(exp_configure):
     '''
     load GASA model
@@ -184,9 +144,9 @@ def load_model(exp_configure):
 
 
 def random_data_get():
-    with open(r'/data/train_smi.txt') as f:
+    with open(r'./data/train_smi.txt') as f:
         data_left = [line.strip().split('\t') for line in f]
-    with open(r'/data/test_smi.txt') as f:
+    with open(r'./data/test_smi.txt') as f:
         data_right = [line.strip().split('\t') for line in f]
 
     data = data_left + data_right
@@ -260,9 +220,8 @@ class Pack_net(nn.Module):
 
         return loss_total, auc_dev, auc_test, precision, recall,f1_scroe, ham_l, coverage, one_error, RL
 
-
 def new_smi_prop(smi):
-    with open(r'/data/cpd_class_end.txt') as f:
+    with open(r'/home/jghu/meta_pathway/deepGCFX-main/data/cpd_class_end.txt') as f:
         smile_list_origin = [line.strip().split('\t')[0] for line in f]
         smile_list = [Chem.MolToSmiles(Chem.MolFromSmiles(smi)) for smi in smile_list_origin]
     smile_list_orgin = smile_list_origin + [smi]
@@ -440,6 +399,7 @@ if __name__ == '__main__':
     for epoch in range(1, 200+1):
         start = timeit.default_timer()
         loss_total, auc_dev, auc_test, precision, recall,f1_scroe, ham_l, coverage, one_error, RL = pack_model()
+
         end = timeit.default_timer()
         time = end - start
         print('%d\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f' % (
@@ -458,7 +418,6 @@ if __name__ == '__main__':
             embed_test, label_test = get_fea_labels(test_loader)
             xgb_result()
             rf_result()    
-
 
             P_properties = []
             T_properties = []
