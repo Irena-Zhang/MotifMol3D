@@ -12,7 +12,6 @@ MotifMol3D is a predictive tool for molecular metabolic pathway categories that 
 ### Training data
  * Data format: smiles + '\t' + category(represent with corresponding number)
  * Dataset for training, validation and test the model <br/>
- * three external test sets:TS1, TS2 and TS3 <br/>
  
 ### Code manual
  * data.py: import and process the data <br/>
