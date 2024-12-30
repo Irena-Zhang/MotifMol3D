@@ -9,19 +9,21 @@ MotifMol3D is a predictive tool for molecular metabolic pathway categories that 
 * RDKit (recommended version 2018.03.1+) [https://github.com/rdkit/rdkit]
 
 ## Model usage
-### Training data
+### data
  * Data format: smiles + '\t' + category(represent with corresponding number)
  * Dataset for training, validation and test the model <br/>
  
-### Code manual
+### model
  * data.py: import and process the data <br/>
  * gasa_utils_aro.py: converts SMILES into graph with features <br/>
- * hyper.py: code for hyper-parameters optimization <br/>
- * gasa.json: best combination of hyper-parameters for MotifMol3D <br/>
+ * aro_model_metric.py: main gasa <br/>
+ * motif_generator.py: motif generator <br/>
 
-### Test
+### para
+ * gasa.json: best combination of hyper-parameters for MotifMol3D <br/>
+ * cpd_TDB_des.json: TDB descriptor <br/>
+### 
 * main.py: code for predicting the results for given molecules <br/>
-* explain.ipynb: atom weights visualization for given compound <br/>
 
 ## Reference
 1.Yu Z. and Gao H. Molecular representation learning via heterogeneous motif graph neural networks. In, International Conference on Machine Learning. PMLR; 2022. p. 25581-25594.  
