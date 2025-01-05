@@ -36,9 +36,9 @@ class gasa_classifier(torch.nn.Module):
                             negative_slope=0.2, bias=True)
         self.readout = WeightedSumAndMax(hidden_dim2)
         self.reduce_dim = nn.Linear(hidden_dim2, hidden_dim3)
-        # self.predict = nn.Linear(hidden_dim3 + 24, n_tasks)
+        self.predict = nn.Linear(hidden_dim3 + 24, n_tasks)
         # motif  
-        self.predict = nn.Linear(hidden_dim3 + 7, n_tasks)
+        # self.predict = nn.Linear(hidden_dim3 + 7, n_tasks)
         # maccs 
         # self.predict = nn.Linear(hidden_dim3 + 7, n_tasks)
         # TDB 
@@ -70,8 +70,8 @@ class gasa_classifier(torch.nn.Module):
         reduce_g_feats = self.reduce_dim(g_feats)
         trans_motif_embed = self.motif_trans(motif_vocab)
         mixed_enbedding = torch.cat((reduce_g_feats, trans_motif_embed), 1)
-        # mixed_enbedding = torch.cat((mixed_enbedding, maccs[:, [0, 1, 2, 3, 4, 5, 6]]), 1)
-        # mixed_enbedding = torch.cat((mixed_enbedding, feature_3d), 1)
+        mixed_enbedding = torch.cat((mixed_enbedding, maccs[:, [0, 1, 2, 3, 4, 5, 6]]), 1)
+        mixed_enbedding = torch.cat((mixed_enbedding, feature_3d), 1)
         hg = self.predict(mixed_enbedding)
 
         return hg, node_weights, mixed_enbedding
