@@ -27,8 +27,10 @@ MotifMol3D is a predictive tool for molecular metabolic pathway categories that 
 ### 
 * main.py: code for training <br/>
 * test.py: code for predicting the results for given molecules; replace the smiles formula when using it <br/>
-  '<# example :smiles
-    smi = 'O=C(O)[C@@H](O)[C@H](O)[C@H](O)CO'>'
+  ```
+  # example :smiles
+  smi = 'O=C(O)[C@@H](O)[C@H](O)[C@H](O)CO'
+  ```
 
 ## Reference
 1.Yu Z. and Gao H. Molecular representation learning via heterogeneous motif graph neural networks. In, International Conference on Machine Learning. PMLR; 2022. p. 25581-25594.  
