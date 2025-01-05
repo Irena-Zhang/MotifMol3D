@@ -188,14 +188,22 @@ def run_test_epoch(args, model, loader, device, embed_model, embed_bond):
         total_labels = torch.cat((total_labels, label.cpu()), 0)
 
         # 计算多标签 MCC
-    mcc_scores = []
-    num_labels = label_list.shape[1]  # 假设是多标签问题，每个样本有多个标签
-    for i in range(num_labels):
-        mcc = matthews_corrcoef(label_list[:, i], t_list[:, i])
-        mcc_scores.append(mcc)
-    
-    # 计算所有标签的平均 MCC
-    average_mcc = np.mean(mcc_scores)
+        mcc_scores = []  # 用来保存每个标签的 MCC 分数
+
+        # 判断 label_list 的维度
+        if len(label_list.shape) == 1:
+            # 单标签情况，每个样本只有一个标签
+            mcc = matthews_corrcoef(label_list, t_list)
+            mcc_scores.append(mcc)
+        else:
+            # 多标签情况，每个样本有多个标签
+            num_labels = label_list.shape[1]  # 获取标签的数量
+            for i in range(num_labels):
+                mcc = matthews_corrcoef(label_list[:, i], t_list[:, i])
+                mcc_scores.append(mcc)
+
+        # 计算所有标签的平均 MCC
+        average_mcc = np.mean(mcc_scores)
 
     auc = accuracy_score(t_list, label_list)
     precision = precision_score(t_list, label_list)
