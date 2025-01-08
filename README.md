@@ -23,7 +23,6 @@ MotifMol3D is a predictive tool for molecular metabolic pathway categories that 
 ### para
  * gasa.json: best combination of hyper-parameters for MotifMol3D <br/>
  * cpd_TDB_des.json: TDB descriptor <br/>
-
 ### 
 * main.py: code for training <br/>
 * test.py: code for predicting the results for given molecules; replace the smiles formula when using it <br/>
