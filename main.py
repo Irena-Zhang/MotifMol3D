@@ -187,22 +187,20 @@ def run_test_epoch(args, model, loader, device, embed_model, embed_bond):
         total_preds = torch.cat((total_preds, prediction.cpu()), 0)
         total_labels = torch.cat((total_labels, label.cpu()), 0)
 
-        # 计算多标签 MCC
-        mcc_scores = []  # 用来保存每个标签的 MCC 分数
-
-        # 判断 label_list 的维度
+        # Calculate Multi-label case MCC
+        mcc_scores = []  
         if len(label_list.shape) == 1:
-            # 单标签情况，每个样本只有一个标签
+            # Multi-label case, each sample has multiple labels
             mcc = matthews_corrcoef(label_list, t_list)
             mcc_scores.append(mcc)
         else:
-            # 多标签情况，每个样本有多个标签
-            num_labels = label_list.shape[1]  # 获取标签的数量
+            # Multi-label case, each sample has only one label
+            num_labels = label_list.shape[1] 
             for i in range(num_labels):
                 mcc = matthews_corrcoef(label_list[:, i], t_list[:, i])
                 mcc_scores.append(mcc)
 
-        # 计算所有标签的平均 MCC
+        # Calculate the average MCC for all labels
         average_mcc = np.mean(mcc_scores)
 
     auc = accuracy_score(t_list, label_list)
@@ -304,9 +302,9 @@ def xgb_result():
     one_error = One_error(label_dev, Y_dev)
     RL = Ranking_loss(label_dev, Y_dev)
 
-    # 修正 MCC 计算：逐标签计算 MCC，并计算平均 MCC
+    # Modified MCC calculation: calculate MCC per label and calculate the average MCC
     mcc_scores = []
-    for i in range(label_dev.shape[1]):  # 遍历每个标签
+    for i in range(label_dev.shape[1]): 
         mcc = matthews_corrcoef(label_dev[:, i].numpy(), Y_dev[:, i].numpy())
         mcc_scores.append(mcc)
     mcc = np.mean(mcc_scores)
@@ -335,9 +333,9 @@ def xgb_result():
     one_error = One_error(label_test, Y_test)
     RL = Ranking_loss(label_test, Y_test)
 
-    # 修正 MCC 计算：逐标签计算 MCC，并计算平均 MCC
+    # Modified MCC calculation: calculate MCC per label and calculate the average MCC
     mcc_scores = []
-    for i in range(label_test.shape[1]):  # 遍历每个标签
+    for i in range(label_test.shape[1]): 
         mcc = matthews_corrcoef(label_test[:, i].numpy(), Y_test[:, i].numpy())
         mcc_scores.append(mcc)
     mcc = np.mean(mcc_scores)
