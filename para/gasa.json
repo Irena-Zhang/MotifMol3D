@@ -5,5 +5,6 @@
     "num_heads": 6,
     "hidden_dim1": 128,
     "hidden_dim2": 64,
-    "hidden_dim3": 64
+    "hidden_dim3": 64,
+    "pretrained_weights": "./para/motif_3D.pkl"
 }
