@@ -24,9 +24,26 @@ import xgboost as xgb
 from xgboost.sklearn import XGBClassifier
 import warnings
 warnings.filterwarnings('ignore')
+import time
+from datetime import timedelta
 
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
+
+pathway_mapping = {
+    0: "Carbohydrate metabolism",
+    1: "Energy metabolism",
+    2: "Lipid metabolism",
+    3: "Nucleotide metabolism",
+    4: "Amino acid metabolism",
+    5: "Metabolism of other amino acids",
+    6: "Glycan biosynthesis and metabolism",
+    7: "Metabolism of cofactors and vitamins",
+    8: "Metabolism of terpenoids and polyketides",
+    9: "Biosynthesis of other secondary metabolites",
+    10: "Xenobiotics biodegradation and metabolism"
+}
 
 def Coverage(label, output):
     label = label.to('cpu').data.numpy()
@@ -85,6 +102,7 @@ def parse():
                         help='Metric for evaluation (default: roc_auc_score)')
     parser.add_argument('-p', '--result-path', type=str, default='gasa/results',
                         help='Path to save training results (default: classification_results)')
+    parser.add_argument('--pretrained_weights', type=str, default="/data2/jghu/model/MotifMol3D-main/motif_3D_best.pkl")
     args = parser.parse_args().__dict__
 
     return args
@@ -278,6 +296,7 @@ def set_seed(seed=0):
     os.environ['PYTHONHASHSEED'] = str(seed)
 
 if __name__ == '__main__':
+    start_time = time.time()
     # Parse arguments
     args = parse()
 
@@ -299,11 +318,12 @@ if __name__ == '__main__':
 
     # Load existing weights if specified
     if 'pretrained_weights' in args and os.path.exists(args['pretrained_weights']):
+        # args['pretrained_weights'] = r'/data2/jghu/model/MotifMol3D-main/motif_3D_best.pkl'
         print(f"Loading weights from {args['pretrained_weights']}...")
         pack_model.load_state_dict(torch.load(args['pretrained_weights'], map_location=device))
     else:
         print("No pretrained weights specified or file does not exist. Initializing model from scratch.")
-
+    
     # Prepare data
     print('data prepare ......')
     dataset_train, dataset_dev, dataset_test = random_data_get()
@@ -313,7 +333,8 @@ if __name__ == '__main__':
     embed_train, label_train = get_fea_labels(train_loader)
 
     # example :smiles
-    smi = 'O=C(O)[C@@H](O)[C@H](O)[C@H](O)CO'
+    # smi = 'O=C(O)[C@@H](O)[C@H](O)[C@H](O)CO'
+    smi = 'CCCC(=O)O'
     print(f'input: {smi}')
     print('starting predict ......')
     predicted_loader = new_smi_prop(smi)
@@ -323,7 +344,16 @@ if __name__ == '__main__':
     print('predicted ......')
     # Y_test = torch.tensor([[0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]])
     indices = torch.nonzero(Y_test == 1)
-    pathways = [str(row[1].item()) for row in indices]
+    pathway_ids = [str(row[1].item()) for row in indices]
+    print(f"pathway_ids: {pathway_ids}")
+    pathways = [f"{pid}: {pathway_mapping.get(int(pid))}" for pid in pathway_ids]
     print(Y_test)
-    print(f"{smi} maybe participates in {pathways} pathway")
+    if pathways:
+        print(f"{smi} maybe participates in {pathways} pathway")
+    else:
+        print(f"{smi} may not be involved in any pathways in the database.")
     print('---------- GOOD LUCK ----------')
+
+    end_time = time.time()
+    total_time = end_time - start_time
+    print(f"Total execution time: {timedelta(seconds=total_time)}")
