@@ -25,6 +25,10 @@ MotifMol3D is a predictive tool for molecular metabolic pathway categories that 
  * cpd_TDB_des.json: TDB descriptor <br/>
 ### 
 * main.py: code for training <br/>
+  ```
+  $ python main.py
+  $ python test.py --pretrained_weights ./para/motif_3D.pkl
+  ```
 * test.py: code for predicting the results for given molecules; replace the smiles formula when using it <br/>
   ```
   # example :smiles
