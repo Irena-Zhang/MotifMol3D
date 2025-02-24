@@ -28,8 +28,27 @@ import time
 from datetime import timedelta
 
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+
+def print_gpu_info():
+    if torch.cuda.is_available():
+        # Get the current GPU device index
+        device_index = torch.cuda.current_device()
+        # Get the name of the GPU device
+        gpu_name = torch.cuda.get_device_name(device_index)
+        # Get the installed CUDA version
+        cuda_version = torch.version.cuda
+        # Check if CUDA is supported by PyTorch
+        cuda_available = torch.cuda.is_available()
+        # Get the current GPU memory usage
+        memory_allocated = torch.cuda.memory_allocated(device_index) / 1024**2  # Convert to MB
+        memory_reserved = torch.cuda.memory_reserved(device_index) / 1024**2  # Convert to MB
+
+        print(f"Using GPU: {gpu_name} (Device Index: {device_index})")
+        print(f"CUDA Version: {cuda_version}")
+        print(f"PyTorch CUDA Support: {'Available' if cuda_available else 'Not Available'}")
+        print(f"Current GPU Memory Usage: Allocated {memory_allocated:.2f} MB, Reserved {memory_reserved:.2f} MB")
+    else:
+        print("No GPU detected, using CPU")
 
 pathway_mapping = {
     0: "Carbohydrate metabolism",
@@ -303,6 +322,8 @@ if __name__ == '__main__':
     # Set random seed for reproducibility
     set_seed(0)
 
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
     # Load experiment configuration
     exp_config = get_configure(args['model'])
     exp_config.update({'model': args['model']})
@@ -318,7 +339,7 @@ if __name__ == '__main__':
 
     # Load existing weights if specified
     if 'pretrained_weights' in args and os.path.exists(args['pretrained_weights']):
-        # args['pretrained_weights'] = r'/data2/jghu/model/MotifMol3D-main/motif_3D_best.pkl'
+        args['pretrained_weights'] = r'./para/motif_3D.pkl'
         print(f"Loading weights from {args['pretrained_weights']}...")
         pack_model.load_state_dict(torch.load(args['pretrained_weights'], map_location=device))
     else:
@@ -333,14 +354,16 @@ if __name__ == '__main__':
     embed_train, label_train = get_fea_labels(train_loader)
 
     # example :smiles
-    # smi = 'O=C(O)[C@@H](O)[C@H](O)[C@H](O)CO'
-    smi = 'CCCC(=O)O'
+    smi = 'O=C(O)[C@@H](O)[C@H](O)[C@H](O)CO'
+    # smi = 'CCCC(=O)O'
+    # smi = 'CC(=O)N[C@H]1[C@@H](OP(=O)(O)OP(=O)(O)OC[C@H]2O[C@@H](n3ccc(=O)[nH]c3=O)[C@H](O)[C@@H]2O)O[C@H](C(=O)O)[C@H](O)[C@@H]1O'
     print(f'input: {smi}')
     print('starting predict ......')
     predicted_loader = new_smi_prop(smi)
     embed_test = predict_smi_end(predicted_loader)
     # Perform XGBoost training and evaluation
     Y_test = xgb_result(embed_train, label_train,embed_test)
+    print_gpu_info()
     print('predicted ......')
     # Y_test = torch.tensor([[0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0]])
     indices = torch.nonzero(Y_test == 1)
